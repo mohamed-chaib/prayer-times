@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="./node_modules/axios/dist/axios.js"></script>
+  <title>مواقيت الصلاة</title>
+  <style>
+    *{
+      box-sizing: border-box;
+    }
+
+    html {
+      width: 100%;
+      font-family: sans-serif;
+
+    }
+    h2 {
+      display: inline;
+    }
+
+    body {
+      width: 100vw;
+      margin: 0;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center center;
+      object-fit: cover;
+    }
+
+    .container {
+      position: relative;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    .head {
+
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      color: white;
+    }
+
+    .container::before {
+      overflow: hidden;
+      content: "";
+      position: absolute;
+      background: linear-gradient(to right, #216ce7, rgb(53, 132, 221));
+      top: -690px;
+      left: 50%;
+      width: 200rem;
+      height: 800px;
+      border-radius: 50%;
+      translate: -50% 0;
+      z-index: -1;
+    }
+
+    .section1 {
+      margin: 5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      flex-wrap: wrap;
+
+    }
+
+    .caledar {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+
+    }
+
+    .section2 {
+      display: flex;
+      justify-content: space-around;
+      background: linear-gradient(to right, #216ce7, #3584dd);
+      box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+      flex-wrap: wrap;
+    }
+
+    .salat {
+
+      text-align: center;
+      height: 15rem;
+      width: 11rem;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+      background-color: white;
+      margin: 2rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .time,
+    .calendar,
+    .city {
+      border: 2px solid transparent;
+      font-size: xx-large;
+      font-weight: 700;
+      padding: 1.3rem;
+      border-radius: 8px;
+      box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+      background: linear-gradient(to right, #216ce7, #3584dd);
+      color: white;
+      line-height: 1.5rem;
+    }
+
+    .calendar {
+      font-size: medium;
+    }
+
+    .city {
+      font-size: large;
+      padding: 1rem;
+      cursor: pointer;
+
+    }
+
+    option {
+      cursor: pointer;
+      color: #216ce7;
+    }
+
+    .salat>time {
+      font-size: xx-large;
+      font-weight: 600;
+
+    }
+
+    @media screen and (max-width : 640px) {
+      .section1 {
+        gap: 3rem;
+      }
+
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header class="head">
+      <h1>مواقيت الصلاة</h1>
+    </header>
+    <main>
+      <section class="section1">
+        <div class="calendar">
+          <div id="calendar-hejry"></div>
+          <div id="calendar-melady"></div>
+        </div>
+
+        <select onchange="changeTheCIty(this.value)" class="city"></select>
+
+        <div class="time"><time id="time" dir="ltr" datetime=""> </time></div>
+      </section>
+      <section class="section2">
+        <div class="salat">
+          <h2>العشاء</h2>
+          <time id="isha-time" datetime=""></time>
+        </div>
+        <div class="salat">
+          <h2>المغرب</h2>
+          <time id="maghrib-time" datetime=""></time>
+        </div>
+        <div class="salat">
+          <h2>العصر</h2>
+          <time id="asr-time" datetime=""></time>
+        </div>
+        <div class="salat">
+          <h2>الظهر</h2>
+          <time id="dhuhr-time" datetime=""></time>
+        </div>
+        <div class="salat">
+          <h2>الشروق</h2>
+          <time id="sunrise-time" datetime=""></time>
+        </div>
+        <div class="salat">
+          <h2>الفجر</h2>
+          <time id="fajr-time" datetime=""></time>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+      //call the function 
+    getRequest();
+    //localStorage.setItem("city","algeria");
+    let time = document.getElementById("time");
+    let citySelect = document.querySelector(".city");
+    let cities = [
+      {
+        arabicName: "الجزائر",
+        name: "algeria",
+      },
+      {
+        arabicName: "وهران",
+        name: "oran",
+      },
+      {
+        arabicName: "تقرت",
+        name: "touggourt",
+      },
+    ];
+    setCities();
+    // show the cities in html
+    function setCities() {
+      for (const city of cities) {
+        citySelect.innerHTML += `<option >${city.arabicName}</option>`;
+      }
+    }
+    // get the time and show it in html
+    function showTime() {
+      const now = new Date();
+      hour = now.getHours();
+      minute = now.getMinutes();
+      second = now.getSeconds();
+      time.innerHTML = ` ${hour} : ${minute} : ${second} `;
+    }
+    setInterval(showTime, 100);
+// get the reqeust
+    function getRequest(city = "algeria") {
+      const now = new Date();
+
+      axios
+        .get(
+          `https://api.aladhan.com/v1/calendarByCity/${now.getFullYear()}/${now.getMonth() + 1
+          }?city=${city},&country=Algeria&method=2`
+        )
+        .then((response) => {
+          let day = now.getDate()-1
+          let dateMilady = response.data.data[day].date.gregorian.date;
+          let dateHijri = {
+            year: response.data.data[day].date.hijri.year,
+            month: response.data.data[day].date.hijri.month.ar,
+            day: response.data.data[day].date.hijri.day,
+            weekday: response.data.data[day].date.hijri.weekday.ar,
+          };
+          const timings = response.data.data[day].timings;
+
+          fillTheDate(
+            "calendar-hejry",
+            dateHijri,
+            "calendar-melady",
+            dateMilady
+          );
+          fillTimeForPrayer("fajr-time", timings.Fajr);
+          fillTimeForPrayer("sunrise-time", timings.Sunrise);
+          fillTimeForPrayer("dhuhr-time", timings.Dhuhr);
+          fillTimeForPrayer("asr-time", timings.Asr);
+          fillTimeForPrayer("maghrib-time", timings.Maghrib);
+          fillTimeForPrayer("isha-time", timings.Isha);
+        })
+        .catch((err) => {
+          alert(err.message);
+        });
+    }
+    // function for add the time of one salat to the card
+    function fillTimeForPrayer(id, time) {
+      document.getElementById(id).innerHTML = time.slice(0, -5);
+    }
+    // finction get the date hijri
+    function fillTheDate(idHijry, dateHijri, idMelady, dateMilady) {
+      document.getElementById(
+        idHijry
+      ).innerHTML = `${dateHijri.weekday}   <br> ${dateHijri.day}  ${dateHijri.month} ${dateHijri.year} `;
+      document.getElementById(idMelady).innerHTML = `${dateMilady}`;
+    }
+  // get the request when change the city
+    function changeTheCIty(value) {
+      for (const city of cities) {
+        if (city.arabicName == value) {
+          getRequest(city.name);
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>
